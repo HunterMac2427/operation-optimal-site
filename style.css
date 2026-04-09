@@ -17,9 +17,9 @@
     --oo-gold:        #c8a84b;
     --oo-gold-dim:    rgba(200, 168, 75, 0.15);
     --oo-cream:       #ffffff;
-    --oo-cream-dim:   rgba(255, 255, 255, 0.6);
-    --oo-border:      rgba(255, 255, 255, 0.06);
-    --oo-border-gold: rgba(200, 168, 75, 0.2);
+    --oo-cream-dim:   rgba(255, 255, 255, 0.8);
+    --oo-border:      rgba(255, 255, 255, 0.12);
+    --oo-border-gold: rgba(200, 168, 75, 0.35);
 
     --font-display:   'Bebas Neue', sans-serif;
     --font-body:      'DM Sans', sans-serif;
@@ -67,8 +67,8 @@ img { max-width: 100%; height: auto; display: block; }
 /* ── Shared label ── */
 .oo-label {
     font-family: var(--font-body);
-    font-size: 0.6875rem;
-    font-weight: 600;
+    font-size: 0.8125rem;
+    font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--oo-gold);
@@ -84,12 +84,12 @@ img { max-width: 100%; height: auto; display: block; }
 /* ── Buttons ── */
 .oo-btn-primary {
     display: inline-block;
-    padding: 0.9rem 2.25rem;
+    padding: 1rem 2.5rem;
     font-family: var(--font-body);
-    font-size: 0.875rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    color: var(--oo-bg);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #0d1a0d;
     background: var(--oo-gold);
     border: none;
     cursor: pointer;
@@ -102,14 +102,14 @@ img { max-width: 100%; height: auto; display: block; }
 
 .oo-btn-ghost {
     display: inline-block;
-    padding: 0.9rem 2.25rem;
+    padding: 1rem 2.5rem;
     font-family: var(--font-body);
-    font-size: 0.875rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
     color: var(--oo-cream);
     background: transparent;
-    border: 1px solid var(--oo-border);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     cursor: pointer;
     transition: border-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
 }
@@ -130,12 +130,12 @@ img { max-width: 100%; height: auto; display: block; }
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1rem;
     background: var(--oo-gold);
-    color: var(--oo-bg);
+    color: #0d1a0d;
     font-family: var(--font-body);
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.8125rem;
+    font-weight: 700;
     letter-spacing: 0.04em;
 }
 
@@ -149,7 +149,7 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 .oo-banner-link {
-    color: var(--oo-bg);
+    color: #0d1a0d;
     text-decoration: underline;
     text-underline-offset: 2px;
     transition: opacity 0.15s;
@@ -193,9 +193,9 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 .oo-nav-links a {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--oo-cream-dim);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
     transition: color 0.15s;
     cursor: pointer;
 }
@@ -203,11 +203,11 @@ img { max-width: 100%; height: auto; display: block; }
 .oo-nav-links a:hover { color: var(--oo-cream); }
 
 .oo-nav-cta {
-    padding: 0.45rem 1.1rem;
-    font-size: 0.75rem;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.04em;
-    color: var(--oo-bg);
+    color: #0d1a0d;
     background: var(--oo-gold);
     transition: background 0.2s var(--ease-out);
 }
@@ -253,8 +253,8 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 .oo-hero-label {
-    font-size: 0.6875rem;
-    font-weight: 600;
+    font-size: 0.8125rem;
+    font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--oo-gold);
@@ -304,7 +304,7 @@ img { max-width: 100%; height: auto; display: block; }
 .oo-hero-subtitle {
     font-family: var(--font-display);
     font-size: clamp(1.25rem, 2.5vw, 1.75rem);
-    color: var(--oo-cream-dim);
+    color: rgba(255, 255, 255, 0.9);
     line-height: 1.2;
     margin-bottom: 2.5rem;
     letter-spacing: 0.04em;
@@ -324,8 +324,8 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 .oo-hero-desc p {
-    font-size: 0.9375rem;
-    color: var(--oo-cream-dim);
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.85);
     line-height: 1.7;
 }
 
@@ -375,7 +375,7 @@ img { max-width: 100%; height: auto; display: block; }
 
 .oo-inside .oo-card-icon { color: var(--oo-gold); }
 .oo-inside .oo-card h3 { color: var(--oo-bg); }
-.oo-inside .oo-card p { color: #4a4a4a; }
+.oo-inside .oo-card p { color: #333333; }
 
 .oo-section-header {
     text-align: center;
@@ -427,7 +427,7 @@ img { max-width: 100%; height: auto; display: block; }
 
 .oo-card p {
     font-size: 0.9375rem;
-    color: var(--oo-cream-dim);
+    color: rgba(255, 255, 255, 0.85);
     line-height: 1.7;
 }
 
@@ -460,8 +460,8 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 .oo-author-text p {
-    font-size: 0.9375rem;
-    color: var(--oo-cream-dim);
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.85);
     line-height: 1.75;
     margin-bottom: 1rem;
     max-width: var(--text-max);
@@ -476,8 +476,9 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 .oo-credentials li {
-    font-size: 0.875rem;
-    color: var(--oo-gold);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: #d4b96a;
     padding-left: 1rem;
     position: relative;
 }
@@ -500,8 +501,8 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 .oo-companion .oo-companion-text h2 { color: #1a1a1a; }
-.oo-companion .oo-companion-text p { color: #4a4a4a; }
-.oo-companion .oo-feature-list li { color: #4a4a4a; }
+.oo-companion .oo-companion-text p { color: #333333; }
+.oo-companion .oo-feature-list li { color: #333333; }
 
 .oo-companion-grid {
     display: grid;
@@ -582,8 +583,8 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 .oo-cta p {
-    font-size: 1.0625rem;
-    color: var(--oo-cream-dim);
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.85);
     margin-bottom: 2.5rem;
     max-width: var(--text-max);
 }
@@ -650,16 +651,16 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 .oo-footer-links a {
-    font-size: 0.8125rem;
-    color: var(--oo-cream-dim);
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.75);
     transition: color 0.15s;
 }
 
 .oo-footer-links a:hover { color: var(--oo-cream); }
 
 .oo-footer-copy {
-    font-size: 0.75rem;
-    color: rgba(255, 252, 225, 0.3);
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.45);
 }
 
 /* ============================================================
