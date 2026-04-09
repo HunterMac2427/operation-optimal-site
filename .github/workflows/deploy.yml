@@ -1,0 +1,22 @@
+name: Deploy to Cloudways
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Cloudways Git Pull
+        run: |
+          TOKEN=$(curl -s -X POST "https://api.cloudways.com/api/v1/oauth/access_token" \
+            -d "email=${{ secrets.CW_EMAIL }}" \
+            -d "api_key=${{ secrets.CW_API_KEY }}" | jq -r '.access_token')
+
+          curl -s -X POST "https://api.cloudways.com/api/v1/git/pull" \
+            -H "Authorization: Bearer $TOKEN" \
+            -d "server_id=${{ secrets.CW_SERVER_ID }}" \
+            -d "app_id=${{ secrets.CW_APP_ID }}" \
+            -d "branch_name=master" \
+            -d "deploy_path=public_html"
