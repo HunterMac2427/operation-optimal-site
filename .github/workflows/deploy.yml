@@ -20,3 +20,12 @@ jobs:
             -d "app_id=${{ secrets.CW_APP_ID }}" \
             -d "branch_name=master" \
             -d "deploy_path=public_html"
+
+          # Wait for pull to complete
+          sleep 10
+
+          # Purge Varnish cache
+          curl -s -X POST "https://api.cloudways.com/api/v1/service/varnish" \
+            -H "Authorization: Bearer $TOKEN" \
+            -d "server_id=${{ secrets.CW_SERVER_ID }}" \
+            -d "action=purge"
