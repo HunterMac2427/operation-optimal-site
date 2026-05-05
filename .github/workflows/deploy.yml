@@ -8,23 +8,38 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Cloudways Git Pull
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        env:
+          SSH_HOST: 157.245.15.106
+          SSH_USER: master_jfxmdatmhr
+          SSH_PASS: ${{ secrets.CW_SSH_PASS }}
+          DEPLOY_DIR: /home/master/applications/ykyuhnjqzv/public_html
+        run: |
+          sudo apt-get install -y sshpass > /dev/null 2>&1
+
+          # Sync site files (exclude git/github/dev files)
+          sshpass -p "$SSH_PASS" rsync -avz --delete \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.gitignore' \
+            --exclude='CLAUDE.md' \
+            --exclude='wp-*' \
+            --exclude='index.php.bak' \
+            --exclude='license.txt' \
+            --exclude='readme.html' \
+            --exclude='xmlrpc.php' \
+            --exclude='.htaccess' \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            ./ "$SSH_USER@$SSH_HOST:$DEPLOY_DIR/"
+
+      - name: Purge Varnish
         run: |
           TOKEN=$(curl -s -X POST "https://api.cloudways.com/api/v1/oauth/access_token" \
             -d "email=${{ secrets.CW_EMAIL }}" \
             -d "api_key=${{ secrets.CW_API_KEY }}" | jq -r '.access_token')
 
-          curl -s -X POST "https://api.cloudways.com/api/v1/git/pull" \
-            -H "Authorization: Bearer $TOKEN" \
-            -d "server_id=${{ secrets.CW_SERVER_ID }}" \
-            -d "app_id=${{ secrets.CW_APP_ID }}" \
-            -d "branch_name=master" \
-            -d "deploy_path="
-
-          # Wait for pull to complete
-          sleep 10
-
-          # Purge Varnish cache
           curl -s -X POST "https://api.cloudways.com/api/v1/service/varnish" \
             -H "Authorization: Bearer $TOKEN" \
             -d "server_id=${{ secrets.CW_SERVER_ID }}" \
