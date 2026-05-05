@@ -19,7 +19,7 @@ jobs:
             -d "server_id=${{ secrets.CW_SERVER_ID }}" \
             -d "app_id=${{ secrets.CW_APP_ID }}" \
             -d "branch_name=master" \
-            -d "deploy_path=public_html"
+            -d "deploy_path="
 
           # Wait for pull to complete
           sleep 10
