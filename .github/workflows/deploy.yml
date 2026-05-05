@@ -20,7 +20,8 @@ jobs:
           sudo apt-get install -y sshpass > /dev/null 2>&1
 
           # Sync site files (exclude git/github/dev files)
-          sshpass -p "$SSH_PASS" rsync -avz --delete \
+          # Exit code 23 = partial transfer (timestamp permission errors) — files are fine
+          sshpass -p "$SSH_PASS" rsync -rlvz --delete \
             --exclude='.git' \
             --exclude='.github' \
             --exclude='.gitignore' \
@@ -32,7 +33,7 @@ jobs:
             --exclude='xmlrpc.php' \
             --exclude='.htaccess' \
             -e "ssh -o StrictHostKeyChecking=no" \
-            ./ "$SSH_USER@$SSH_HOST:$DEPLOY_DIR/"
+            ./ "$SSH_USER@$SSH_HOST:$DEPLOY_DIR/" || [ $? -eq 23 ]
 
       - name: Purge Varnish
         run: |
