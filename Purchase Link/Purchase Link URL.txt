@@ -1,0 +1,19 @@
+https://shop.ingramspark.com/b/084?params=5at6lb7kJLAxMxXRoIiN9BRJYvQ15Y1hGaDCZErTl3f
+
+<html>
+<div style="border: 1px solid #DCDCDC; border-radius: 12px; padding: 15px; display: flex; width:300px;">
+    <div style="display: flex; flex: 45%; padding-right: 15px;">
+        <img src="https://image-hub-cloud.lightningsource.com/2011-04-01/Images/front_cover/x200/sku/9798995715108.jpg?viewkey=e0116030084b9a79295e685ec20af241b73cad7089593ebd77b4d7fb41511910" style="width: 96px; height: auto; align-self: flex-start;" />
+    </div>
+    <div style="flex: 55%;">
+        <div style="text-align: left; font: normal normal bold 16px/22px Open Sans; padding: 5px;">
+            Operation Optimal
+        </div>
+        <div style="text-align: left; font: italic normal normal 13px/18px Open Sans; padding: 5px;">
+             Marjanovic, Tomislav and Clark, Dr. Joseph
+         </div>
+         <div>
+            <a href="https://shop.ingramspark.com/b/084?params=5at6lb7kJLAxMxXRoIiN9BRJYvQ15Y1hGaDCZErTl3f" target="_blank" style="background: #FEBE10 0% 0% no-repeat padding-box; border-radius:8px; color:black; text-decoration:none; width: 163px; height: 34px; display: table-cell; text-align: center; vertical-align: middle; font: normal normal bold 16px/22px Open Sans;">Buy Now</a>
+         </div>
+    </div>
+</div></html>

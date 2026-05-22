@@ -15,23 +15,35 @@ jobs:
           SSH_HOST: 157.245.15.106
           SSH_USER: master_jfxmdatmhr
           SSH_PASS: ${{ secrets.CW_SSH_PASS }}
-          DEPLOY_DIR: /home/master/applications/ykyuhnjqzv/public_html
+          DEPLOY_DIR: /home/master/applications/ykyuhnjqzv/public_html/wp-content/themes/operation-optimal
         run: |
           sudo apt-get install -y sshpass > /dev/null 2>&1
 
-          # Sync site files (exclude git/github/dev files)
+          # Ensure theme directory exists
+          sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" \
+            "mkdir -p $DEPLOY_DIR"
+
+          # Sync theme files (exclude git/github/dev/mockup files)
           # Exit code 23 = partial transfer (timestamp permission errors) — files are fine
           sshpass -p "$SSH_PASS" rsync -rlvz --delete \
             --exclude='.git' \
             --exclude='.github' \
             --exclude='.gitignore' \
             --exclude='CLAUDE.md' \
-            --exclude='wp-*' \
-            --exclude='index.php.bak' \
-            --exclude='license.txt' \
-            --exclude='readme.html' \
-            --exclude='xmlrpc.php' \
-            --exclude='.htaccess' \
+            --exclude='docs' \
+            --exclude='social-posts' \
+            --exclude='book in hand photos' \
+            --exclude='book in hand photos.zip' \
+            --exclude='build_social*.py' \
+            --exclude='instagram-carousels.html' \
+            --exclude='review-followup-email.html' \
+            --exclude='review-insert-card.html' \
+            --exclude='Operation Optimal' \
+            --exclude='Operation Optimal Cover Design.jpg' \
+            --exclude='Purchase Link' \
+            --exclude='paperback-barcode.jpg' \
+            --exclude='operation-optimal-preorders.csv' \
+            --exclude='js' \
             -e "ssh -o StrictHostKeyChecking=no" \
             ./ "$SSH_USER@$SSH_HOST:$DEPLOY_DIR/" || [ $? -eq 23 ]
 

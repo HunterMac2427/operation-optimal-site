@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operation Optimal — Review Insert Card</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px;
+  }
+
+  .card {
+    width: 5in;
+    height: 3in;
+    background: #0a0a0a;
+    color: #fff;
+    border-radius: 8px;
+    padding: 0.35in 0.4in;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #C5A55A, #e8d48b, #C5A55A);
+  }
+
+  .card-header h1 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 16pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #C5A55A;
+    line-height: 1.2;
+  }
+
+  .card-body p {
+    font-size: 8.5pt;
+    line-height: 1.5;
+    color: #ccc;
+    margin-top: 6px;
+  }
+
+  .review-links {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .review-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 8pt;
+    color: #fff;
+  }
+
+  .review-link .label {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 8pt;
+    letter-spacing: 0.04em;
+    color: #C5A55A;
+    min-width: 80px;
+  }
+
+  .review-link .url {
+    color: #aaa;
+    font-size: 7.5pt;
+  }
+
+  .card-footer {
+    font-size: 7pt;
+    color: #666;
+    text-align: center;
+    letter-spacing: 0.03em;
+  }
+
+  /* Print styles */
+  @media print {
+    body {
+      background: none;
+      padding: 0;
+    }
+    .card {
+      border-radius: 0;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <h1>Thank You for Your Support</h1>
+  </div>
+
+  <div class="card-body">
+    <p>Your support means everything. If Operation Optimal has made an impact on you, a short review helps others discover the book and start their own journey toward becoming their best.</p>
+  </div>
+
+  <div class="review-links">
+    <div class="review-link">
+      <span class="label">Amazon</span>
+      <span class="url">amazon.com/dp/1969585048</span>
+    </div>
+    <div class="review-link">
+      <span class="label">Goodreads</span>
+      <span class="url">goodreads.com/book/show/246928004</span>
+    </div>
+  </div>
+
+  <div class="card-footer">
+    OPERATION OPTIMAL &mdash; TOMO MARJANOVIC
+  </div>
+</div>
+
+</body>
+</html>

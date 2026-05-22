@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operation Optimal — Instagram Carousels</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: #0e0e0e;
+    color: #fff;
+    padding: 40px 20px;
+}
+
+h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 8px;
+    color: #c8a84b;
+}
+
+.subtitle {
+    text-align: center;
+    color: #888;
+    font-size: 14px;
+    margin-bottom: 48px;
+}
+
+.carousel-section { margin-bottom: 64px; }
+
+.carousel-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1.5px;
+    color: #c8a84b;
+    margin-bottom: 6px;
+    padding-left: 4px;
+}
+
+.carousel-desc {
+    color: #777;
+    font-size: 13px;
+    margin-bottom: 16px;
+    padding-left: 4px;
+}
+
+.carousel-track {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 16px;
+    scroll-snap-type: x mandatory;
+}
+
+.carousel-track::-webkit-scrollbar { height: 6px; }
+.carousel-track::-webkit-scrollbar-track { background: #1a1a1a; border-radius: 3px; }
+.carousel-track::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+/* ── Slide base — 1080x1350 (4:5 Instagram) ── */
+.slide {
+    width: 1080px;
+    height: 1350px;
+    min-width: 1080px;
+    min-height: 1350px;
+    position: relative;
+    overflow: hidden;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 100px 80px;
+}
+
+/* ── Themes ── */
+.slide--dark { background: #1a2e1a; color: #f5f5f0; }
+.slide--black { background: #0f0f0f; color: #f5f5f0; }
+.slide--cream { background: #f5f5f0; color: #1a2e1a; }
+.slide--gold { background: #c8a84b; color: #1a2e1a; }
+.slide--deep { background: #0d1f0d; color: #f5f5f0; }
+
+/* ── Decorative corners ── */
+.slide__corner-tl,
+.slide__corner-br {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border: 2px solid rgba(200, 168, 75, 0.3);
+}
+.slide__corner-tl { top: 48px; left: 48px; border-right: none; border-bottom: none; }
+.slide__corner-br { bottom: 48px; right: 48px; border-left: none; border-top: none; }
+
+.slide--cream .slide__corner-tl,
+.slide--cream .slide__corner-br { border-color: rgba(26, 46, 26, 0.15); }
+
+.slide--gold .slide__corner-tl,
+.slide--gold .slide__corner-br { border-color: rgba(26, 46, 26, 0.2); }
+
+.slide__line { width: 60px; height: 3px; background: #c8a84b; margin: 0 auto; }
+.slide--cream .slide__line { background: #1a2e1a; }
+.slide--gold .slide__line { background: #1a2e1a; }
+
+/* ── Watermark ── */
+.slide__brand {
+    position: absolute;
+    top: 52px;
+    right: 56px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 3px;
+    opacity: 0.25;
+}
+
+/* ── Page dots ── */
+.slide__page {
+    position: absolute;
+    bottom: 52px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+}
+.slide__page-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(200, 168, 75, 0.2);
+}
+.slide__page-dot--active { background: #c8a84b; }
+.slide--cream .slide__page-dot { background: rgba(26, 46, 26, 0.15); }
+.slide--cream .slide__page-dot--active { background: #1a2e1a; }
+.slide--gold .slide__page-dot { background: rgba(26, 46, 26, 0.2); }
+.slide--gold .slide__page-dot--active { background: #1a2e1a; }
+
+/* ── Typography ── */
+.slide__chapter {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #c8a84b;
+    margin-bottom: 40px;
+}
+.slide--cream .slide__chapter { color: #8a7333; }
+.slide--gold .slide__chapter { color: #1a2e1a; }
+
+.slide__title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 92px;
+    line-height: 0.95;
+    letter-spacing: 3px;
+    margin-bottom: 40px;
+}
+.slide__title--lg { font-size: 110px; }
+.slide__title--sm { font-size: 76px; }
+.slide__title--xs { font-size: 64px; }
+
+/* Book paragraph — the "meat" */
+.slide__para {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 30px;
+    line-height: 1.65;
+    font-weight: 400;
+    max-width: 860px;
+    text-align: left;
+}
+
+.slide__quote {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 36px;
+    line-height: 1.55;
+    font-weight: 400;
+    max-width: 840px;
+}
+.slide__quote--lg { font-size: 42px; font-weight: 500; }
+.slide__quote--sm { font-size: 30px; }
+.slide__quote--italic { font-style: italic; }
+
+.slide__quote em,
+.slide__para em {
+    color: #c8a84b;
+    font-style: normal;
+    font-weight: 600;
+}
+.slide--cream .slide__quote em,
+.slide--cream .slide__para em { color: #8a7333; }
+
+/* Pull quote — large centered emphasis */
+.slide__pull {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 44px;
+    line-height: 1.4;
+    font-weight: 500;
+    max-width: 800px;
+    font-style: italic;
+}
+
+/* ── Action steps ── */
+.slide__steps {
+    text-align: left;
+    width: 100%;
+    max-width: 880px;
+}
+.slide__steps-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px;
+    letter-spacing: 2px;
+    margin-bottom: 52px;
+    text-align: center;
+}
+.slide__step {
+    display: flex;
+    gap: 28px;
+    margin-bottom: 48px;
+    align-items: flex-start;
+}
+.slide__step-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px;
+    line-height: 1;
+    color: #c8a84b;
+    min-width: 56px;
+}
+.slide--cream .slide__step-num { color: #1a2e1a; }
+.slide__step-text { padding-top: 10px; }
+.slide__step-heading { font-weight: 700; font-size: 26px; margin-bottom: 8px; line-height: 1.3; }
+.slide__step-body { font-size: 22px; line-height: 1.5; opacity: 0.8; }
+
+/* ── Comparison ── */
+.slide__compare {
+    display: flex;
+    gap: 48px;
+    align-items: center;
+    width: 100%;
+    max-width: 880px;
+}
+.slide__compare-col { flex: 1; text-align: center; }
+.slide__compare-label { font-size: 20px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; opacity: 0.6; }
+.slide__compare-price { font-family: 'Bebas Neue', sans-serif; font-size: 96px; line-height: 1; margin-bottom: 12px; }
+.slide__compare-desc { font-size: 20px; opacity: 0.7; line-height: 1.5; }
+.slide__compare-vs { font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: #c8a84b; min-width: 56px; }
+.slide__compare-col--bad .slide__compare-price { opacity: 0.4; text-decoration: line-through; }
+
+/* ── Ownership list ── */
+.slide__own-list { text-align: left; max-width: 820px; }
+.slide__own-item { font-size: 34px; line-height: 1.6; margin-bottom: 32px; font-style: italic; }
+.slide__own-item strong { color: #c8a84b; font-style: normal; }
+.slide--cream .slide__own-item strong { color: #1a2e1a; font-weight: 700; }
+
+/* ── List ── */
+.slide__list { text-align: left; list-style: none; max-width: 840px; width: 100%; }
+.slide__list li {
+    font-size: 32px;
+    line-height: 1.5;
+    padding: 24px 0 24px 28px;
+    border-bottom: 1px solid rgba(200, 168, 75, 0.15);
+    position: relative;
+}
+.slide__list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    background: #c8a84b;
+    border-radius: 50%;
+}
+.slide--cream .slide__list li { border-bottom-color: rgba(26, 46, 26, 0.12); }
+.slide--cream .slide__list li::before { background: #1a2e1a; }
+
+/* ── Photo CTA slide ── */
+.slide--photo {
+    padding: 0;
+    position: relative;
+}
+.slide__photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.slide__photo-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 60px 64px 80px;
+    background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.7) 50%, transparent 100%);
+    text-align: center;
+    z-index: 2;
+}
+.slide__photo-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 2px;
+    color: #fff;
+    margin-bottom: 12px;
+}
+.slide__photo-sub {
+    font-size: 24px;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 28px;
+    line-height: 1.4;
+}
+.slide__photo-url {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: #c8a84b;
+    letter-spacing: 1px;
+}
+
+/* ── Seven Steps list ── */
+.slide__numbered {
+    text-align: left;
+    max-width: 840px;
+    width: 100%;
+    counter-reset: step;
+}
+.slide__numbered-item {
+    font-size: 28px;
+    line-height: 1.5;
+    padding: 18px 0 18px 56px;
+    border-bottom: 1px solid rgba(200, 168, 75, 0.12);
+    position: relative;
+    counter-increment: step;
+}
+.slide__numbered-item::before {
+    content: counter(step) ".";
+    position: absolute;
+    left: 0;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: #c8a84b;
+    top: 14px;
+}
+</style>
+</head>
+<body>
+
+<h1>OPERATION OPTIMAL</h1>
+<p class="subtitle">Instagram Carousel Slides &mdash; 1080&times;1350px (4:5 ratio) &mdash; screenshot each slide individually</p>
+
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CAROUSEL 1: INTRODUCTION — "Nobody's Coming to Save You" -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="carousel-section">
+    <div class="carousel-label">CAROUSEL 1 &mdash; INTRODUCTION</div>
+    <div class="carousel-desc">6 slides &bull; Photo: tomo-img_4597.jpg (selfie at Aspire)</div>
+    <div class="carousel-track">
+
+        <!-- S1: Bold hook -->
+        <div class="slide slide--dark">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__chapter">FROM THE BOOK</div>
+            <div class="slide__title slide__title--lg">NOBODY'S<br>COMING TO<br>SAVE YOU.</div>
+            <div class="slide__line"></div>
+        </div>
+
+        <!-- S2: Paragraph from book -->
+        <div class="slide slide--black">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__para">Not your doctor. Not the medical system. Not some miracle drug or next-generation treatment. If you want to be healthy, <em>truly healthy</em>, it's on you. It's your responsibility. And honestly? It's your fault if you're not.<br><br>I know that sounds harsh, but it's the truth. And the truth is beautiful once you understand it. Because if your health is your responsibility, that means you have the <em>power to change it right now</em>.</div>
+        </div>
+
+        <!-- S3: Pull quote -->
+        <div class="slide slide--cream">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__pull">"This book isn't about complicated protocols or expensive treatments. It's about taking responsibility. It's about understanding that the more muscle you have, the longer you'll live. That your gut health affects your brain. That your physical body and mental health are completely tied together."</div>
+        </div>
+
+        <!-- S4: The recipe -->
+        <div class="slide slide--dark">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__quote slide__quote--lg">The recipe is simple:<br><br>Stop eating fast food.<br>Stop drinking soda.<br>Go for walks.<br><br>Those three things alone could change your entire life.<br><br><em>The difficulty is in doing the work.</em></div>
+        </div>
+
+        <!-- S5: 5% effort -->
+        <div class="slide slide--gold">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand" style="color: #1a2e1a;">OPERATION OPTIMAL</span>
+            <div class="slide__quote slide__quote--lg">Just give <strong>five percent</strong> effort to start. Change one habit. Then another.<br><br>That's how you become someone <strong>unrecognizable</strong> from who you are today.</div>
+        </div>
+
+        <!-- S6: Photo CTA -->
+        <div class="slide slide--photo">
+            <img src="assets/images/tomo-img_4597.jpg" alt="Tomo holding Operation Optimal" class="slide__photo-img">
+            <div class="slide__photo-overlay">
+                <div class="slide__photo-title">AVAILABLE NOW</div>
+                <div class="slide__photo-sub">Link in bio to get your copy</div>
+                <div class="slide__photo-url">operationoptimal.com</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CAROUSEL 2: CHAPTER 1 — "Own Your Own Health" -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="carousel-section">
+    <div class="carousel-label">CAROUSEL 2 &mdash; CHAPTER 1: OWN YOUR OWN HEALTH</div>
+    <div class="carousel-desc">7 slides &bull; Photo: tomo-img_4599.jpg (big smile, Aspire)</div>
+    <div class="carousel-track">
+
+        <!-- S1: Bold hook -->
+        <div class="slide slide--black">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__chapter">CHAPTER 1</div>
+            <div class="slide__title">"A PATIENT<br>CURED IS A<br>PATIENT LOST."</div>
+            <div class="slide__line"></div>
+        </div>
+
+        <!-- S2: Opening paragraph -->
+        <div class="slide slide--dark">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__para">Our health is failing us because our healthcare has betrayed it.<br><br>Big Pharma and Big Medicine celebrate our symptom suppression as <em>success</em>; normalizes our chronic fatigue as <em>adulthood</em>; and mistakes our over-medication for medicine. Behind their sterile masks of "standards of care" lies a machine designed to keep us dependent, docile, and just alive enough to pay for more.</div>
+        </div>
+
+        <!-- S3: Pills before progress -->
+        <div class="slide slide--cream">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__pull">"We live in the greatest chronic illness crisis the world has ever seen, and modern medicine's answer is pills before progress. It's like patching the Titanic with chewing gum."</div>
+        </div>
+
+        <!-- S4: Tomo's story -->
+        <div class="slide slide--black">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__para">I decided to follow my doctor's advice. Instead of <em>treating</em> my pain by taking painkillers, I committed to <em>strengthening</em> my body.<br><br>I was ambitious. When I was 19, I told my coach I wanted to be Mr. Olympia. I wanted to take steroids. My coach laughed and told me to get my labs done first!<br><br>That's how my journey into bodybuilding, fitness modeling, and studying anti-aging, hormones, and wellness began.</div>
+        </div>
+
+        <!-- S5: Symptom treatment vs prevention -->
+        <div class="slide slide--dark">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__quote slide__quote--lg">Doctors today are too focused on symptom treatment and not <em>symptom prevention</em>.</div>
+            <div style="height: 48px;"></div>
+            <div class="slide__quote">We've gotten used to the second-rate. We blindly trust authority and funnel ourselves into a system I call <em>"a pill for every ill"</em> &mdash; a system that addresses symptoms and not the root causes of our chronic illnesses.</div>
+        </div>
+
+        <!-- S6: Empowerment -->
+        <div class="slide slide--gold">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand" style="color: #1a2e1a;">OPERATION OPTIMAL</span>
+            <div class="slide__quote slide__quote--lg">This book is about <strong>empowering you</strong> to go on your own health journey without Big Pharma, Big Medicine, or mainstream doctors <em>dictating</em> how it's going to be.<br><br>It's your body, and <strong>you</strong> should be the expert on it, not someone else!</div>
+        </div>
+
+        <!-- S7: Photo CTA -->
+        <div class="slide slide--photo">
+            <img src="assets/images/tomo-img_4599.jpg" alt="Tomo holding Operation Optimal" class="slide__photo-img">
+            <div class="slide__photo-overlay">
+                <div class="slide__photo-title">OWN YOUR HEALTH</div>
+                <div class="slide__photo-sub">Link in bio to get your copy</div>
+                <div class="slide__photo-url">operationoptimal.com</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CAROUSEL 3: CHAPTER 3 — "Hacking Your Way to Health" -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="carousel-section">
+    <div class="carousel-label">CAROUSEL 3 &mdash; CHAPTER 3: HACKING YOUR WAY TO HEALTH</div>
+    <div class="carousel-desc">7 slides &bull; Photo: tomo-img_4594.jpg (outdoor, book up)</div>
+    <div class="carousel-track">
+
+        <!-- S1: Bold hook -->
+        <div class="slide slide--dark">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__chapter">CHAPTER 3</div>
+            <div class="slide__title slide__title--sm">THERE ARE NO<br>SHORTCUTS<br>TO HEALTH.<br>TO WEALTH.<br>TO LEGACY.</div>
+            <div class="slide__line"></div>
+        </div>
+
+        <!-- S2: Opening paragraph -->
+        <div class="slide slide--black">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__para">The road to optimal health isn't a sprint. There are no shortcuts or hacks. It's a marathon. Every step counts.<br><br>This chapter is about avoiding shortcuts, leaning into the hurt, and bringing your whole body and mind to bear in your daily routine. We'll get into workout tips, diet, and motivation.<br><br>Don't wait around. Let's get <em>moving</em>.</div>
+        </div>
+
+        <!-- S3: Cost comparison -->
+        <div class="slide slide--dark">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__chapter">THE REAL COST OF FOOD</div>
+            <div class="slide__compare">
+                <div class="slide__compare-col slide__compare-col--bad">
+                    <div class="slide__compare-label">JUNK-HEAVY CART</div>
+                    <div class="slide__compare-price">$104</div>
+                    <div class="slide__compare-desc">Snacks, sugary drinks, frozen convenience meals</div>
+                </div>
+                <div class="slide__compare-vs">VS</div>
+                <div class="slide__compare-col">
+                    <div class="slide__compare-label">WHOLE-FOOD CART</div>
+                    <div class="slide__compare-price" style="color: #c8a84b;">$64</div>
+                    <div class="slide__compare-desc">Produce, lean proteins, beans, grains, yogurt</div>
+                </div>
+            </div>
+            <div style="margin-top: 40px;"></div>
+            <div class="slide__quote" style="font-size: 26px; opacity: 0.8;">A healthy grocery list can cost around <em>40% less</em> per trip than junk-food choices. Don't let the lie keep you broke and sick.</div>
+        </div>
+
+        <!-- S4: Pull quote -->
+        <div class="slide slide--cream">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__pull">"There's no hack to health; you have to hack your way to health with the determination, discipline, and positivity it would take to chop down the Amazon rainforest using only a handaxe."</div>
+            <div style="height: 32px;"></div>
+            <div class="slide__quote" style="font-size: 28px; opacity: 0.7;">Now imagine that you're also the trees, and for every drop of effort you put in, you get twice as strong.</div>
+        </div>
+
+        <!-- S5: Healthy to happy -->
+        <div class="slide slide--dark">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__quote slide__quote--lg">The goal of all of this is not masochism.<br><br>You go through the hurt to get to the healthy, and <em>you go through the healthy to get to the happy</em>.</div>
+        </div>
+
+        <!-- S6: Action steps -->
+        <div class="slide slide--black">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__steps">
+                <div class="slide__steps-title">ACTION STEPS</div>
+                <div class="slide__step">
+                    <div class="slide__step-num">1</div>
+                    <div class="slide__step-text">
+                        <div class="slide__step-heading">Train your whole body, not just your favorites</div>
+                        <div class="slide__step-body">Don't skip leg day, back day, or cardio. A strong body is a balanced body. Commit to a weekly split that hits every major muscle group.</div>
+                    </div>
+                </div>
+                <div class="slide__step">
+                    <div class="slide__step-num">2</div>
+                    <div class="slide__step-text">
+                        <div class="slide__step-heading">Eliminate one shortcut you're relying on</div>
+                        <div class="slide__step-body">Identify a habit that feels productive but is really avoidance. Replace it with cold showers, a disciplined routine, or simply pushing harder.</div>
+                    </div>
+                </div>
+                <div class="slide__step">
+                    <div class="slide__step-num">3</div>
+                    <div class="slide__step-text">
+                        <div class="slide__step-heading">Start your morning with a win</div>
+                        <div class="slide__step-body">Cold water to the face, 20 bodyweight reps, then a clean whole food meal. Start strong, and the rest of your day will follow.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- S7: Photo CTA -->
+        <div class="slide slide--photo">
+            <img src="assets/images/tomo-img_4594.jpg" alt="Operation Optimal book" class="slide__photo-img">
+            <div class="slide__photo-overlay">
+                <div class="slide__photo-title">NO MORE SHORTCUTS</div>
+                <div class="slide__photo-sub">Link in bio to get your copy</div>
+                <div class="slide__photo-url">operationoptimal.com</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CAROUSEL 4: CHAPTER 5 — "Become Your Body's Best Expert" -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="carousel-section">
+    <div class="carousel-label">CAROUSEL 4 &mdash; CHAPTER 5: BECOME YOUR BODY'S BEST EXPERT</div>
+    <div class="carousel-desc">7 slides &bull; Photo: tomo-79969445494 (books in lobby)</div>
+    <div class="carousel-track">
+
+        <!-- S1: Bold hook -->
+        <div class="slide slide--black">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__chapter">CHAPTER 5</div>
+            <div class="slide__title slide__title--sm">YOUR DOCTOR<br>SPENDS<br>12 MINUTES<br>WITH YOU.</div>
+            <div class="slide__line"></div>
+        </div>
+
+        <!-- S2: Opening paragraph -->
+        <div class="slide slide--dark">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__para">Have you ever taken a test and the teacher lets you bring in a one-page cheat sheet?<br><br>That's what this chapter is about &mdash; except this time, the test is your physical health, the classroom is your doctor's office, and the cheat-sheet is a <em>challenge-sheet</em> that equips you with essential knowledge, empowers you to push back on your doctor's assumptions and biases, and teaches you how to be informed on that most important of all subjects, <em>YOU</em>!</div>
+        </div>
+
+        <!-- S3: Assembly line -->
+        <div class="slide slide--cream">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__para" style="text-align: center; max-width: 800px;">The average patient spends just above <em>twelve minutes</em> with their primary care provider. Is that enough time for a truly whole-body analysis and discussion?<br><br>Hell no!<br><br>The yearly checkup assembly line goes something like this:</div>
+            <div style="height: 40px;"></div>
+            <div class="slide__title slide__title--xs" style="font-size: 40px; letter-spacing: 4px; margin-bottom: 0;">GENERIC TEST &rarr; RED FLAG &rarr; PRESCRIPTION &rarr; NEXT!</div>
+        </div>
+
+        <!-- S4: Hormones -->
+        <div class="slide slide--black">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__para">Your body runs on hormones, period. I don't care if you're a Fortune 500 CEO or living under a bridge, your entire system is dictated by hormones.<br><br>Think of them like the fuel in your car, but also the cruise control, making sure you're not red-lining or stalling out. Without hormones, there's no movement, no rhythm, no homeostasis, and without that balance, <em>everything starts to break down</em>.</div>
+        </div>
+
+        <!-- S5: Pull quote -->
+        <div class="slide slide--dark">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__quote slide__quote--lg">You fix the system by <em>understanding the system</em>.</div>
+            <div style="height: 40px;"></div>
+            <div class="slide__quote">Good research isn't just about facts. It's about questions. It's about knowing what to ask and where to look for the answer.<br><br>You're not looking for a pill. You're looking for the <em>breakdown in the chain</em>.</div>
+        </div>
+
+        <!-- S6: Action steps -->
+        <div class="slide slide--black">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__steps">
+                <div class="slide__steps-title">ACTION STEPS</div>
+                <div class="slide__step">
+                    <div class="slide__step-num">1</div>
+                    <div class="slide__step-text">
+                        <div class="slide__step-heading">Bring a challenge sheet to your next physical</div>
+                        <div class="slide__step-body">Ask what they're testing, what they're not testing, and why. If your doctor gives you pushback, don't fold. Push back.</div>
+                    </div>
+                </div>
+                <div class="slide__step">
+                    <div class="slide__step-num">2</div>
+                    <div class="slide__step-text">
+                        <div class="slide__step-heading">Build baseline knowledge with real learning</div>
+                        <div class="slide__step-body">Study how your body works when it's not broken. Understand the hormone cascade &mdash; how signaling works and how upstream problems lead to downstream symptoms.</div>
+                    </div>
+                </div>
+                <div class="slide__step">
+                    <div class="slide__step-num">3</div>
+                    <div class="slide__step-text">
+                        <div class="slide__step-heading">Reverse-engineer one symptom you've been ignoring</div>
+                        <div class="slide__step-body">Trace it upstream. What hormone systems affect it? What markers should be tested? Schedule bloodwork and treat it like a real investigation.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- S7: Photo CTA -->
+        <div class="slide slide--photo">
+            <img src="assets/images/tomo-79969445494__6a551020-9971-4b47-ad57-b0db4cacc507.jpg" alt="Operation Optimal books" class="slide__photo-img">
+            <div class="slide__photo-overlay">
+                <div class="slide__photo-title">BECOME YOUR OWN EXPERT</div>
+                <div class="slide__photo-sub">Link in bio to get your copy</div>
+                <div class="slide__photo-url">operationoptimal.com</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CAROUSEL 5: CHAPTER 11 — "Optimizing for Happiness" -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="carousel-section">
+    <div class="carousel-label">CAROUSEL 5 &mdash; CHAPTER 11: OPTIMIZING FOR HAPPINESS</div>
+    <div class="carousel-desc">7 slides &bull; Photo: tomo-img_4598.jpg (Aspire polo)</div>
+    <div class="carousel-track">
+
+        <!-- S1: Bold hook -->
+        <div class="slide slide--cream">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__chapter" style="color: #8a7333;">CHAPTER 11</div>
+            <div class="slide__title slide__title--sm">DISCIPLINE<br>OVER<br>EMOTION.</div>
+            <div class="slide__line"></div>
+        </div>
+
+        <!-- S2: Opening paragraph -->
+        <div class="slide slide--dark">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__para">Most people chase happiness through pleasure, money, or status, mistaking comfort for fulfillment, but that's hedonism. True happiness isn't found in possessions or temporary highs; it's built on <em>health</em>, both physical and mental.<br><br>Without health, lasting happiness is impossible. Even those facing illness can find peace through acceptance and gratitude, yet they'd undoubtedly be happier without disease.</div>
+        </div>
+
+        <!-- S3: Stoicism -->
+        <div class="slide slide--black">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__para">If hedonism is the sickness of our culture, Stoicism is the cure. This philosophy redefines happiness not as pleasure, but as discipline, the alignment of mind, body, and spirit with purpose.<br><br>We can't control external events, only our reactions. If a hurricane destroys my house, I can cry, or I can act. Stoicism means choosing strength, <em>choosing to act</em>.<br><br>Stress can kill. Control it before it controls you.</div>
+        </div>
+
+        <!-- S4: Self-talk -->
+        <div class="slide slide--cream">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__own-list" style="max-width: 760px;">
+                <div class="slide__chapter" style="color: #8a7333; margin-bottom: 32px;">WE ALL HEAR THAT INNER CRITIC</div>
+                <div class="slide__own-item">"I can't do this."</div>
+                <div class="slide__own-item">"I'm not good enough."</div>
+                <div class="slide__own-item">"I'm an imposter."</div>
+                <div style="height: 24px;"></div>
+                <div class="slide__chapter" style="color: #1a2e1a; margin-bottom: 32px;">BUT YOU CAN CHOOSE THE RESPONSE</div>
+                <div class="slide__own-item"><strong style="color: #1a2e1a;">"No, I can do this."</strong></div>
+                <div class="slide__own-item"><strong style="color: #1a2e1a;">"No, I am enough."</strong></div>
+                <div class="slide__own-item"><strong style="color: #1a2e1a;">"No, I am the real deal."</strong></div>
+            </div>
+        </div>
+
+        <!-- S5: Morning prayer -->
+        <div class="slide slide--dark">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__chapter">TOMO'S MORNING PRAYER</div>
+            <div class="slide__pull" style="font-size: 34px; line-height: 1.6;">"I understand that everything is my fault. I understand the power I hold through focused action. I am not and have never been a victim. I'm grateful for the challenges God has blessed me with. If I ask one thing, it's for patience and understanding so I may walk through adversity with a smile."</div>
+        </div>
+
+        <!-- S6: Action steps -->
+        <div class="slide slide--black">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__steps">
+                <div class="slide__steps-title">ACTION STEPS</div>
+                <div class="slide__step">
+                    <div class="slide__step-num">1</div>
+                    <div class="slide__step-text">
+                        <div class="slide__step-heading">Start a gratitude practice</div>
+                        <div class="slide__step-body">Every morning, write down at least three things you are grateful for. Keep them in a journal or a jar and review them weekly.</div>
+                    </div>
+                </div>
+                <div class="slide__step">
+                    <div class="slide__step-num">2</div>
+                    <div class="slide__step-text">
+                        <div class="slide__step-heading">Reframe your self-talk</div>
+                        <div class="slide__step-body">When negative thoughts arise, acknowledge them, then immediately replace them with affirmations aligned with your values. Practice daily until positive self-talk becomes automatic.</div>
+                    </div>
+                </div>
+                <div class="slide__step">
+                    <div class="slide__step-num">3</div>
+                    <div class="slide__step-text">
+                        <div class="slide__step-heading">Live authentically</div>
+                        <div class="slide__step-body">Journal about who you truly want to be and take one small step each week that aligns your actions with that authentic self.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- S7: Photo CTA -->
+        <div class="slide slide--photo">
+            <img src="assets/images/tomo-img_4598.jpg" alt="Tomo with Operation Optimal" class="slide__photo-img">
+            <div class="slide__photo-overlay">
+                <div class="slide__photo-title">OPTIMIZE YOUR HAPPINESS</div>
+                <div class="slide__photo-sub">Link in bio to get your copy</div>
+                <div class="slide__photo-url">operationoptimal.com</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CAROUSEL 6: CONCLUSION — "It's My Fault" -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="carousel-section">
+    <div class="carousel-label">CAROUSEL 6 &mdash; CONCLUSION: IT'S MY FAULT</div>
+    <div class="carousel-desc">7 slides &bull; Photo: tomo-79969440746 (outdoor plaza)</div>
+    <div class="carousel-track">
+
+        <!-- S1: Bold hook -->
+        <div class="slide slide--dark">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__chapter">THE CONCLUSION</div>
+            <div class="slide__title slide__title--lg">IT'S MY<br>FAULT.</div>
+            <div class="slide__line"></div>
+        </div>
+
+        <!-- S2: Opening paragraph -->
+        <div class="slide slide--black">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__para">It's never too late to change. I hope that's clear by now. Your own Operation Optimal starts and ends with one person: <em>you</em>.<br><br>Every chapter in this book has pointed towards a single truth: <em>you are the solution to your own problem</em>. No doctor, pill, or quick fix can replace the mindset that everything in your life &mdash; your health, your wealth, your happiness &mdash; begins with ownership.</div>
+        </div>
+
+        <!-- S3: When things go wrong -->
+        <div class="slide slide--cream">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__chapter" style="color: #8a7333; margin-bottom: 48px;">WHEN THINGS GO WRONG</div>
+            <div class="slide__own-list">
+                <div class="slide__own-item">"I lost my relationship... <strong>it's my fault.</strong>"</div>
+                <div class="slide__own-item">"I got fired... <strong>it's my fault.</strong>"</div>
+                <div class="slide__own-item">"I was diagnosed with type II diabetes... <strong>it's my fault.</strong>"</div>
+            </div>
+        </div>
+
+        <!-- S4: When things go right -->
+        <div class="slide slide--gold">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand" style="color: #1a2e1a;">OPERATION OPTIMAL</span>
+            <div class="slide__chapter" style="color: #1a2e1a; margin-bottom: 48px;">WHEN THINGS GO RIGHT</div>
+            <div class="slide__own-list">
+                <div class="slide__own-item">"I bought my dream car... <strong style="color: #1a2e1a;">it's my fault.</strong>"</div>
+                <div class="slide__own-item">"My business is thriving again... <strong style="color: #1a2e1a;">it's my fault.</strong>"</div>
+                <div class="slide__own-item">"I've trained hard and feel stronger than ever... <strong style="color: #1a2e1a;">it's my fault.</strong>"</div>
+            </div>
+        </div>
+
+        <!-- S5: Power statements -->
+        <div class="slide slide--deep">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__para" style="text-align: center; max-width: 780px;">Ownership works both ways. The same radical accountability that forces you to face your failures also gives you credit for your victories.<br><br><em>If it's your fault, that means it's in your hands to fix.</em></div>
+            <div style="height: 48px;"></div>
+            <div class="slide__list" style="max-width: 740px;">
+                <li style="font-size: 34px; padding: 24px 0 24px 32px;">I have the <strong style="color: #c8a84b;">power</strong> to create positive change.</li>
+                <li style="font-size: 34px; padding: 24px 0 24px 32px;">I'm <strong style="color: #c8a84b;">responsible</strong> for what happens to me.</li>
+                <li style="font-size: 34px; padding: 24px 0 24px 32px;">Every obstacle is an <strong style="color: #c8a84b;">opportunity</strong>.</li>
+                <li style="font-size: 34px; padding: 24px 0 24px 32px;"><strong style="color: #c8a84b;">God has given me</strong> room to grow.</li>
+            </div>
+        </div>
+
+        <!-- S6: Final call -->
+        <div class="slide slide--dark">
+            <div class="slide__corner-tl"></div>
+            <div class="slide__corner-br"></div>
+            <span class="slide__brand">OPERATION OPTIMAL</span>
+            <div class="slide__quote slide__quote--lg">No matter your age &mdash; 25, 60, or 85 &mdash; the door is still open.<br><br>What matters isn't where you start; it's whether you <em>decide to start at all</em>.</div>
+            <div style="height: 48px;"></div>
+            <div class="slide__pull" style="font-size: 36px;">"All my problems are my fault."</div>
+            <div style="height: 16px;"></div>
+            <div class="slide__quote" style="font-size: 26px; opacity: 0.6;">&mdash; Tomo Marjanovic</div>
+        </div>
+
+        <!-- S7: Photo CTA -->
+        <div class="slide slide--photo">
+            <img src="assets/images/tomo-79969440746__8680b8cd-536c-4c94-bc69-0e4513901789.jpg" alt="Tomo with Operation Optimal" class="slide__photo-img">
+            <div class="slide__photo-overlay">
+                <div class="slide__photo-title">TAKE OWNERSHIP</div>
+                <div class="slide__photo-sub">Link in bio to get your copy</div>
+                <div class="slide__photo-url">operationoptimal.com</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+</body>
+</html>
